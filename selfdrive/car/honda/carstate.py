@@ -116,8 +116,8 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
 
   # add gas interceptor reading if we are using it
   if CP.enableGasInterceptor:
-    signals.append(("INTERCEPTOR_GAS", "GAS_SENSOR"))
-    signals.append(("INTERCEPTOR_GAS2", "GAS_SENSOR"))
+    signals.extend((("INTERCEPTOR_GAS", "GAS_SENSOR"), ("INTERCEPTOR_GAS2",
+                                                        "GAS_SENSOR")))
     checks.append(("GAS_SENSOR", 50))
 
   if CP.openpilotLongitudinalControl:

@@ -94,13 +94,12 @@ def create_lkas_ui_command(packer, main_on: bool, enabled: bool, steer_alert: bo
       lines += 5
   elif main_on:
     lines = 0
+  elif hud_control.leftLaneDepart:
+    lines = 3  # WarnLeft_NoRight
+  elif hud_control.rightLaneDepart:
+    lines = 15  # NoLeft_WarnRight
   else:
-    if hud_control.leftLaneDepart:
-      lines = 3  # WarnLeft_NoRight
-    elif hud_control.rightLaneDepart:
-      lines = 15  # NoLeft_WarnRight
-    else:
-      lines = 30  # LA_Off
+    lines = 30  # LA_Off
 
   # TODO: use level 1 for no sound when less severe?
   hands_on_wheel_dsply = 2 if steer_alert else 0

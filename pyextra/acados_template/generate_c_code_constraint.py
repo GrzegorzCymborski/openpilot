@@ -47,11 +47,7 @@ def generate_c_code_constraint( model, con_name, is_terminal, opts ):
     x = model.x
     p = model.p
 
-    if isinstance(x, casadi.MX):
-        symbol = MX.sym
-    else:
-        symbol = SX.sym
-
+    symbol = MX.sym if isinstance(x, casadi.MX) else SX.sym
     if is_terminal:
         con_h_expr = model.con_h_expr_e
         con_phi_expr = model.con_phi_expr_e
@@ -68,11 +64,7 @@ def generate_c_code_constraint( model, con_name, is_terminal, opts ):
         raise Exception("acados: you can either have constraint_h, or constraint_phi, not both.")
 
     if not (is_empty(con_h_expr) and is_empty(con_phi_expr)):
-        if is_empty(con_h_expr):
-            constr_type = 'BGP'
-        else:
-            constr_type = 'BGH'
-
+        constr_type = 'BGP' if is_empty(con_h_expr) else 'BGH'
         if is_empty(p):
             p = symbol('p', 0, 0)
 
@@ -91,7 +83,7 @@ def generate_c_code_constraint( model, con_name, is_terminal, opts ):
 
         cwd = os.getcwd()
         os.chdir(code_export_dir)
-        gen_dir = con_name + '_constraints'
+        gen_dir = f'{con_name}_constraints'
         if not os.path.exists(gen_dir):
             os.mkdir(gen_dir)
         gen_dir_location = os.path.join('.', gen_dir)
@@ -100,9 +92,9 @@ def generate_c_code_constraint( model, con_name, is_terminal, opts ):
         # export casadi functions
         if constr_type == 'BGH':
             if is_terminal:
-                fun_name = con_name + '_constr_h_e_fun_jac_uxt_zt'
+                fun_name = f'{con_name}_constr_h_e_fun_jac_uxt_zt'
             else:
-                fun_name = con_name + '_constr_h_fun_jac_uxt_zt'
+                fun_name = f'{con_name}_constr_h_fun_jac_uxt_zt'
 
             jac_ux_t = transpose(jacobian(con_h_expr, vertcat(u,x)))
             jac_z_t = jacobian(con_h_expr, z)
@@ -113,9 +105,9 @@ def generate_c_code_constraint( model, con_name, is_terminal, opts ):
             if opts['generate_hess']:
 
                 if is_terminal:
-                    fun_name = con_name + '_constr_h_e_fun_jac_uxt_zt_hess'
+                    fun_name = f'{con_name}_constr_h_e_fun_jac_uxt_zt_hess'
                 else:
-                    fun_name = con_name + '_constr_h_fun_jac_uxt_zt_hess'
+                    fun_name = f'{con_name}_constr_h_fun_jac_uxt_zt_hess'
 
                 # adjoint
                 adj_ux = jtimes(con_h_expr, vertcat(u, x), lam_h, True)
@@ -134,19 +126,19 @@ def generate_c_code_constraint( model, con_name, is_terminal, opts ):
                 constraint_fun_jac_tran_hess.generate(fun_name, casadi_opts)
 
             if is_terminal:
-                fun_name = con_name + '_constr_h_e_fun'
+                fun_name = f'{con_name}_constr_h_e_fun'
             else:
-                fun_name = con_name + '_constr_h_fun'
+                fun_name = f'{con_name}_constr_h_fun'
             h_fun = Function(fun_name, [x, u, z, p], [con_h_expr])
             h_fun.generate(fun_name, casadi_opts)
 
         else: # BGP constraint
             if is_terminal:
-                fun_name = con_name + '_phi_e_constraint'
+                fun_name = f'{con_name}_phi_e_constraint'
                 r = model.con_r_in_phi_e
                 con_r_expr = model.con_r_expr_e
             else:
-                fun_name = con_name + '_phi_constraint'
+                fun_name = f'{con_name}_phi_constraint'
                 r = model.con_r_in_phi
                 con_r_expr = model.con_r_expr
 
